@@ -14623,6 +14623,134 @@ fn test_create_ai_model_missing_provider() {
 }
 
 #[test]
+fn test_create_ai_model_missing_model_name() {
+    let sql = "CREATE AI MODEL my_openai PROVIDER 'openai'";
+    let dialects = all_dialects();
+    assert!(dialects.parse_sql_statements(sql).is_err());
+}
+
+#[test]
+fn test_create_ai_model_wrong_clause_order() {
+    // API_KEY cannot come before MODEL_NAME (strict order)
+    let sql = "CREATE AI MODEL my_openai PROVIDER 'openai' API_KEY 'sk-abc' MODEL_NAME 'gpt-4'";
+    let dialects = all_dialects();
+    assert!(dialects.parse_sql_statements(sql).is_err());
+}
+
+#[test]
+fn test_create_ai_model_with_endpoint_only() {
+    // ENDPOINT without API_KEY (skip optional clause)
+    let sql = "CREATE AI MODEL local PROVIDER 'custom' MODEL_NAME 'embed' ENDPOINT 'http://localhost'";
+    let dialects = all_dialects();
+    match dialects.verified_stmt(sql) {
+        Statement::CreateAiModel(CreateAiModel {
+            name,
+            provider,
+            model_name,
+            api_key,
+            endpoint,
+            options,
+        }) => {
+            assert_eq!(name.to_string(), "local");
+            assert_eq!(provider, "custom");
+            assert_eq!(model_name, "embed");
+            assert_eq!(api_key, None);
+            assert_eq!(endpoint, Some("http://localhost".to_string()));
+            assert_eq!(options, None);
+        }
+        _ => unreachable!(),
+    }
+}
+
+#[test]
+fn test_create_ai_model_with_options_only() {
+    // OPTIONS without API_KEY or ENDPOINT
+    let sql = "CREATE AI MODEL my_model PROVIDER 'openai' MODEL_NAME 'gpt-4' OPTIONS '{\"dimension\":1536}'";
+    let dialects = all_dialects();
+    match dialects.verified_stmt(sql) {
+        Statement::CreateAiModel(CreateAiModel {
+            name,
+            provider,
+            model_name,
+            api_key,
+            endpoint,
+            options,
+        }) => {
+            assert_eq!(name.to_string(), "my_model");
+            assert_eq!(provider, "openai");
+            assert_eq!(model_name, "gpt-4");
+            assert_eq!(api_key, None);
+            assert_eq!(endpoint, None);
+            assert_eq!(options, Some("{\"dimension\":1536}".to_string()));
+        }
+        _ => unreachable!(),
+    }
+}
+
+#[test]
+fn test_drop_ai_model_display_roundtrip() {
+    let sql = "DROP AI MODEL my_openai";
+    let dialects = all_dialects();
+    let stmt = dialects.verified_stmt(sql);
+    assert_eq!(stmt.to_string(), sql);
+}
+
+#[test]
+fn test_show_ai_models_display_roundtrip() {
+    let sql = "SHOW AI MODELS";
+    let dialects = all_dialects();
+    let stmt = dialects.verified_stmt(sql);
+    assert_eq!(stmt.to_string(), sql);
+}
+
+#[test]
+fn test_create_ai_model_quoted_name() {
+    // Quoted identifier for model name
+    let sql = "CREATE AI MODEL \"my-model\" PROVIDER 'openai' MODEL_NAME 'gpt-4'";
+    let dialects = all_dialects();
+    match dialects.verified_stmt(sql) {
+        Statement::CreateAiModel(CreateAiModel { name, .. }) => {
+            assert_eq!(name.to_string(), "\"my-model\"");
+        }
+        _ => unreachable!(),
+    }
+}
+
+#[test]
+fn test_create_ai_model_escaped_quotes() {
+    // Single quotes in string values (escaped)
+    let sql = "CREATE AI MODEL my_model PROVIDER 'O''Reilly' MODEL_NAME 'text-embed'";
+    let dialects = all_dialects();
+    match dialects.verified_stmt(sql) {
+        Statement::CreateAiModel(CreateAiModel { provider, .. }) => {
+            assert_eq!(provider, "O'Reilly");
+        }
+        _ => unreachable!(),
+    }
+}
+
+#[test]
+fn test_create_ai_model_qualified_name() {
+    // Qualified object name (schema.model)
+    let sql = "CREATE AI MODEL ai.my_openai PROVIDER 'openai' MODEL_NAME 'gpt-4'";
+    let dialects = all_dialects();
+    match dialects.verified_stmt(sql) {
+        Statement::CreateAiModel(CreateAiModel { name, .. }) => {
+            assert_eq!(name.to_string(), "ai.my_openai");
+        }
+        _ => unreachable!(),
+    }
+}
+
+#[test]
+fn test_create_ai_model_empty_sql() {
+    // Empty input after CREATE AI MODEL keywords
+    let sql = "CREATE AI MODEL";
+    let dialects = all_dialects();
+    assert!(dialects.parse_sql_statements(sql).is_err());
+}
+
+#[test]
 fn test_select_where_with_like_or_ilike_any() {
     verified_stmt(r#"SELECT * FROM x WHERE a ILIKE ANY '%abc%'"#);
     verified_stmt(r#"SELECT * FROM x WHERE a LIKE ANY '%abc%'"#);
