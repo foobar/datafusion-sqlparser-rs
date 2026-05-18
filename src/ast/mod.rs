@@ -67,7 +67,7 @@ pub use self::ddl::{
     AlterTableOperation, AlterTableType, AlterType, AlterTypeAddValue, AlterTypeAddValuePosition,
     AlterTypeOperation, AlterTypeRename, AlterTypeRenameValue, ClusteredBy, ColumnDef,
     ColumnOption, ColumnOptionDef, ColumnOptions, ColumnPolicy, ColumnPolicyProperty,
-    ConstraintCharacteristics, CreateConnector, CreateDomain, CreateExtension, CreateFunction,
+    ConstraintCharacteristics, CreateAiModel, CreateConnector, CreateDomain, CreateExtension, CreateFunction,
     CreateIndex, CreateOperator, CreateOperatorClass, CreateOperatorFamily, CreatePolicy,
     CreatePolicyCommand, CreatePolicyType, CreateTable, CreateTrigger, CreateView, Deduplicate,
     DeferrableInitial, DropBehavior, DropExtension, DropFunction, DropOperator, DropOperatorClass,
@@ -3610,6 +3610,10 @@ pub enum Statement {
     /// See [Hive](https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=27362034#LanguageManualDDL-CreateDataConnectorCreateConnector)
     CreateConnector(CreateConnector),
     /// ```sql
+    /// CREATE AI MODEL <name> PROVIDER 'provider' MODEL_NAME 'model_name' [API_KEY 'key'] [ENDPOINT 'url'] [OPTIONS 'json']
+    /// ```
+    CreateAiModel(CreateAiModel),
+    /// ```sql
     /// CREATE OPERATOR
     /// ```
     /// See [PostgreSQL](https://www.postgresql.org/docs/current/sql-createoperator.html)
@@ -3791,6 +3795,13 @@ pub enum Statement {
     /// ```
     DropFunction(DropFunction),
     /// ```sql
+    /// DROP AI MODEL <name>
+    /// ```
+    DropAiModel {
+        /// The name of the AI model to drop.
+        name: ObjectName,
+    },
+    /// ```sql
     /// DROP DOMAIN
     /// ```
     /// See [PostgreSQL](https://www.postgresql.org/docs/current/sql-dropdomain.html)
@@ -3935,6 +3946,10 @@ pub enum Statement {
         /// Optional filter for which functions to display.
         filter: Option<ShowStatementFilter>,
     },
+    /// ```sql
+    /// SHOW AI MODELS
+    /// ```
+    ShowAiModels,
     /// ```sql
     /// SHOW <variable>
     /// ```
@@ -5332,6 +5347,7 @@ impl fmt::Display for Statement {
             }
             Statement::CreatePolicy(policy) => write!(f, "{policy}"),
             Statement::CreateConnector(create_connector) => create_connector.fmt(f),
+            Statement::CreateAiModel(create_ai_model) => create_ai_model.fmt(f),
             Statement::CreateOperator(create_operator) => create_operator.fmt(f),
             Statement::CreateOperatorFamily(create_operator_family) => {
                 create_operator_family.fmt(f)
@@ -5442,6 +5458,7 @@ impl fmt::Display for Statement {
                 Ok(())
             }
             Statement::DropFunction(drop_function) => write!(f, "{drop_function}"),
+            Statement::DropAiModel { name } => write!(f, "DROP AI MODEL {}", name),
             Statement::DropDomain(DropDomain {
                 if_exists,
                 name,
@@ -5643,6 +5660,7 @@ impl fmt::Display for Statement {
                 }
                 Ok(())
             }
+            Statement::ShowAiModels => write!(f, "SHOW AI MODELS"),
             Statement::Use(use_expr) => use_expr.fmt(f),
             Statement::ShowCollation { filter } => {
                 write!(f, "SHOW COLLATION")?;
@@ -11693,6 +11711,12 @@ impl From<CreateServerStatement> for Statement {
 impl From<CreateConnector> for Statement {
     fn from(c: CreateConnector) -> Self {
         Self::CreateConnector(c)
+    }
+}
+
+impl From<CreateAiModel> for Statement {
+    fn from(c: CreateAiModel) -> Self {
+        Self::CreateAiModel(c)
     }
 }
 
