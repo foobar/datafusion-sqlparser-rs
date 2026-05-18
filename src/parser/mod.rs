@@ -5056,6 +5056,8 @@ impl<'a> Parser<'a> {
             self.parse_create_procedure(or_alter)
         } else if self.parse_keyword(Keyword::CONNECTOR) {
             self.parse_create_connector().map(Into::into)
+        } else if self.parse_keywords(&[Keyword::AI, Keyword::MODEL]) {
+            self.parse_create_ai_model()
         } else if self.parse_keyword(Keyword::OPERATOR) {
             // Check if this is CREATE OPERATOR FAMILY or CREATE OPERATOR CLASS
             if self.parse_keyword(Keyword::FAMILY) {
@@ -7086,6 +7088,49 @@ impl<'a> Parser<'a> {
         })
     }
 
+    /// Parse CREATE AI MODEL statement
+    fn parse_create_ai_model(&mut self) -> Result<Statement, ParserError> {
+        let name = self.parse_object_name(false)?;
+
+        // PROVIDER (required)
+        self.expect_keyword(Keyword::PROVIDER)?;
+        let provider = self.parse_literal_string()?;
+
+        // MODEL_NAME (required) - two keywords MODEL + NAME
+        self.expect_keywords(&[Keyword::MODEL, Keyword::NAME])?;
+        let model_name = self.parse_literal_string()?;
+
+        // API_KEY (optional) - two keywords API + KEY
+        let api_key = if self.parse_keywords(&[Keyword::API, Keyword::KEY]) {
+            Some(self.parse_literal_string()?)
+        } else {
+            None
+        };
+
+        // ENDPOINT (optional)
+        let endpoint = if self.parse_keyword(Keyword::ENDPOINT) {
+            Some(self.parse_literal_string()?)
+        } else {
+            None
+        };
+
+        // OPTIONS (optional) - JSON string literal
+        let options = if self.parse_keyword(Keyword::OPTIONS) {
+            Some(self.parse_literal_string()?)
+        } else {
+            None
+        };
+
+        Ok(Statement::CreateAiModel(CreateAiModel {
+            name,
+            provider,
+            model_name,
+            api_key,
+            endpoint,
+            options,
+        }))
+    }
+
     /// Parse a `DROP` statement.
     pub fn parse_drop(&mut self) -> Result<Statement, ParserError> {
         // MySQL dialect supports `TEMPORARY`
@@ -7124,6 +7169,9 @@ impl<'a> Parser<'a> {
             return self.parse_drop_policy().map(Into::into);
         } else if self.parse_keyword(Keyword::CONNECTOR) {
             return self.parse_drop_connector();
+        } else if self.parse_keywords(&[Keyword::AI, Keyword::MODEL]) {
+            let name = self.parse_object_name(false)?;
+            return Ok(Statement::DropAiModel { name });
         } else if self.parse_keyword(Keyword::DOMAIN) {
             return self.parse_drop_domain().map(Into::into);
         } else if self.parse_keyword(Keyword::PROCEDURE) {
@@ -7145,7 +7193,7 @@ impl<'a> Parser<'a> {
             };
         } else {
             return self.expected(
-                "CONNECTOR, DATABASE, EXTENSION, FUNCTION, INDEX, OPERATOR, POLICY, PROCEDURE, ROLE, SCHEMA, SECRET, SEQUENCE, STAGE, TABLE, TRIGGER, TYPE, VIEW, MATERIALIZED VIEW or USER after DROP",
+                "AI MODEL, CONNECTOR, DATABASE, EXTENSION, FUNCTION, INDEX, OPERATOR, POLICY, PROCEDURE, ROLE, SCHEMA, SECRET, SEQUENCE, STAGE, TABLE, TRIGGER, TYPE, VIEW, MATERIALIZED VIEW or USER after DROP",
                 self.peek_token(),
             );
         };
@@ -14707,6 +14755,8 @@ impl<'a> Parser<'a> {
             Ok(self.parse_show_views(terse, false)?)
         } else if self.parse_keyword(Keyword::FUNCTIONS) {
             Ok(self.parse_show_functions()?)
+        } else if self.parse_keywords(&[Keyword::AI, Keyword::MODELS]) {
+            Ok(Statement::ShowAiModels)
         } else if extended || full {
             Err(ParserError::ParserError(
                 "EXTENDED/FULL are not supported with this type of SHOW query".to_string(),
