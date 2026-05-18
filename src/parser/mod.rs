@@ -7359,12 +7359,12 @@ impl<'a> Parser<'a> {
         self.expect_keyword(Keyword::PROVIDER)?;
         let provider = self.parse_literal_string()?;
 
-        // MODEL_NAME (required) - two keywords MODEL + NAME
-        self.expect_keywords(&[Keyword::MODEL, Keyword::NAME])?;
+        // MODEL_NAME (required)
+        self.expect_keyword(Keyword::MODEL_NAME)?;
         let model_name = self.parse_literal_string()?;
 
-        // API_KEY (optional) - two keywords API + KEY
-        let api_key = if self.parse_keywords(&[Keyword::API, Keyword::KEY]) {
+        // API_KEY (optional)
+        let api_key = if self.parse_keyword(Keyword::API_KEY) {
             Some(self.parse_literal_string()?)
         } else {
             None
