@@ -5798,3 +5798,9 @@ impl fmt::Display for CreateAiModel {
         Ok(())
     }
 }
+
+impl Spanned for CreateAiModel {
+    fn span(&self) -> Span {
+        self.name.span()
+    }
+}

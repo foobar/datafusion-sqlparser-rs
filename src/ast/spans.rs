@@ -394,6 +394,7 @@ impl Spanned for Statement {
             Statement::CreateSecret { .. } => Span::empty(),
             Statement::CreateServer { .. } => Span::empty(),
             Statement::CreateConnector { .. } => Span::empty(),
+            Statement::CreateAiModel(create_ai_model) => create_ai_model.span(),
             Statement::CreateOperator(create_operator) => create_operator.span(),
             Statement::CreateOperatorFamily(create_operator_family) => {
                 create_operator_family.span()
@@ -426,6 +427,7 @@ impl Spanned for Statement {
             Statement::DetachDuckDBDatabase { .. } => Span::empty(),
             Statement::Drop { .. } => Span::empty(),
             Statement::DropFunction(drop_function) => drop_function.span(),
+            Statement::DropAiModel { name } => name.span(),
             Statement::DropDomain { .. } => Span::empty(),
             Statement::DropProcedure { .. } => Span::empty(),
             Statement::DropSecret { .. } => Span::empty(),
@@ -435,6 +437,7 @@ impl Spanned for Statement {
             Statement::Discard { .. } => Span::empty(),
             Statement::Set(_) => Span::empty(),
             Statement::ShowFunctions { .. } => Span::empty(),
+            Statement::ShowAiModels => Span::empty(),
             Statement::ShowVariable { .. } => Span::empty(),
             Statement::ShowStatus { .. } => Span::empty(),
             Statement::ShowVariables { .. } => Span::empty(),
