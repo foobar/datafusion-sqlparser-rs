@@ -5757,3 +5757,44 @@ impl From<AlterPolicy> for crate::ast::Statement {
         crate::ast::Statement::AlterPolicy(v)
     }
 }
+
+/// CREATE AI MODEL statement
+#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "visitor", derive(Visit, VisitMut))]
+pub struct CreateAiModel {
+    /// Model name (user-defined identifier)
+    pub name: ObjectName,
+    /// Provider name (e.g., 'openai', 'cohere', 'custom')
+    pub provider: String,
+    /// Provider's model identifier (e.g., 'text-embedding-3-small')
+    pub model_name: String,
+    /// API key for authentication (optional)
+    pub api_key: Option<String>,
+    /// Custom endpoint URL (optional)
+    pub endpoint: Option<String>,
+    /// JSON options string (optional)
+    pub options: Option<String>,
+}
+
+impl fmt::Display for CreateAiModel {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "CREATE AI MODEL {} PROVIDER '{}' MODEL_NAME '{}'",
+            self.name,
+            escape_single_quote_string(&self.provider),
+            escape_single_quote_string(&self.model_name)
+        )?;
+        if let Some(ref api_key) = self.api_key {
+            write!(f, " API_KEY '{}'", escape_single_quote_string(api_key))?;
+        }
+        if let Some(ref endpoint) = self.endpoint {
+            write!(f, " ENDPOINT '{}'", escape_single_quote_string(endpoint))?;
+        }
+        if let Some(ref options) = self.options {
+            write!(f, " OPTIONS '{}'", escape_single_quote_string(options))?;
+        }
+        Ok(())
+    }
+}
