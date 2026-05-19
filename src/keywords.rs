@@ -361,6 +361,7 @@ define_keywords!(
     EACH,
     ELEMENT,
     ELEMENTS,
+    EMBEDDING_DIM,
     ELSE,
     ELSEIF,
     EMPTY,
