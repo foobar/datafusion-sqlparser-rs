@@ -7114,6 +7114,24 @@ impl<'a> Parser<'a> {
             None
         };
 
+        // EMBEDDING_DIM (optional) - integer value
+        let embedding_dim = if self.parse_keyword(Keyword::EMBEDDING_DIM) {
+            let num_value = self.parse_number_value()?.value;
+            // Parse the number string to i32
+            match num_value {
+                Value::Number(s, _) => {
+                    Some(s.parse::<i32>().map_err(|_| {
+                        ParserError::ParserError("EMBEDDING_DIM must be a valid integer".into())
+                    })?)
+                }
+                _ => {
+                    return Err(ParserError::ParserError("EMBEDDING_DIM must be a number".into()));
+                }
+            }
+        } else {
+            None
+        };
+
         // OPTIONS (optional) - JSON string literal
         let options = if self.parse_keyword(Keyword::OPTIONS) {
             Some(self.parse_literal_string()?)
@@ -7127,6 +7145,7 @@ impl<'a> Parser<'a> {
             model_name,
             api_key,
             endpoint,
+            embedding_dim,
             options,
         }))
     }

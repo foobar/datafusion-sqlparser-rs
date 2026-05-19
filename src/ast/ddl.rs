@@ -5327,6 +5327,8 @@ pub struct CreateAiModel {
     pub api_key: Option<String>,
     /// Custom endpoint URL (optional)
     pub endpoint: Option<String>,
+    /// Embedding dimension (optional, for embedding models)
+    pub embedding_dim: Option<i32>,
     /// JSON options string (optional)
     pub options: Option<String>,
 }
@@ -5345,6 +5347,9 @@ impl fmt::Display for CreateAiModel {
         }
         if let Some(ref endpoint) = self.endpoint {
             write!(f, " ENDPOINT '{}'", escape_single_quote_string(endpoint))?;
+        }
+        if let Some(ref embedding_dim) = self.embedding_dim {
+            write!(f, " EMBEDDING_DIM {}", embedding_dim)?;
         }
         if let Some(ref options) = self.options {
             write!(f, " OPTIONS '{}'", escape_single_quote_string(options))?;
