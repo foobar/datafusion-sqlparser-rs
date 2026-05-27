@@ -5775,6 +5775,8 @@ pub struct CreateAiModel {
     pub endpoint: Option<String>,
     /// Embedding dimension (optional, for embedding models)
     pub embedding_dim: Option<i32>,
+    /// MIME type for image embeddings (optional, e.g., 'image/jpeg')
+    pub image_mime: Option<String>,
     /// JSON options string (optional)
     pub options: Option<String>,
 }
@@ -5796,6 +5798,13 @@ impl fmt::Display for CreateAiModel {
         }
         if let Some(ref embedding_dim) = self.embedding_dim {
             write!(f, " EMBEDDING_DIM {}", embedding_dim)?;
+        }
+        if let Some(ref image_mime) = self.image_mime {
+            write!(
+                f,
+                " IMAGE_MIME '{}'",
+                escape_single_quote_string(image_mime)
+            )?;
         }
         if let Some(ref options) = self.options {
             write!(f, " OPTIONS '{}'", escape_single_quote_string(options))?;
