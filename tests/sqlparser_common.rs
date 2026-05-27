@@ -14525,6 +14525,7 @@ fn test_create_ai_model_minimal() {
             api_key,
             endpoint,
             options,
+            ..
         }) => {
             assert_eq!(name.to_string(), "my_openai");
             assert_eq!(provider, "openai");
@@ -14549,6 +14550,7 @@ fn test_create_ai_model_full() {
             api_key,
             endpoint,
             options,
+            ..
         }) => {
             assert_eq!(name.to_string(), "local_embed");
             assert_eq!(provider, "custom");
@@ -14573,6 +14575,7 @@ fn test_create_ai_model_with_api_key() {
             api_key,
             endpoint,
             options,
+            ..
         }) => {
             assert_eq!(name.to_string(), "my_openai");
             assert_eq!(provider, "openai");
@@ -14640,7 +14643,8 @@ fn test_create_ai_model_wrong_clause_order() {
 #[test]
 fn test_create_ai_model_with_endpoint_only() {
     // ENDPOINT without API_KEY (skip optional clause)
-    let sql = "CREATE AI MODEL local PROVIDER 'custom' MODEL_NAME 'embed' ENDPOINT 'http://localhost'";
+    let sql =
+        "CREATE AI MODEL local PROVIDER 'custom' MODEL_NAME 'embed' ENDPOINT 'http://localhost'";
     let dialects = all_dialects();
     match dialects.verified_stmt(sql) {
         Statement::CreateAiModel(CreateAiModel {
@@ -14650,6 +14654,7 @@ fn test_create_ai_model_with_endpoint_only() {
             api_key,
             endpoint,
             options,
+            ..
         }) => {
             assert_eq!(name.to_string(), "local");
             assert_eq!(provider, "custom");
@@ -14675,6 +14680,7 @@ fn test_create_ai_model_with_options_only() {
             api_key,
             endpoint,
             options,
+            ..
         }) => {
             assert_eq!(name.to_string(), "my_model");
             assert_eq!(provider, "openai");

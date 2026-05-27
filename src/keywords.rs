@@ -494,6 +494,7 @@ define_keywords!(
     IGNORE,
     IGNOREHEADER,
     ILIKE,
+    IMAGE_MIME,
     IMMEDIATE,
     IMMUTABLE,
     IMPORT,

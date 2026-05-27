@@ -7119,15 +7119,22 @@ impl<'a> Parser<'a> {
             let num_value = self.parse_number_value()?.value;
             // Parse the number string to i32
             match num_value {
-                Value::Number(s, _) => {
-                    Some(s.parse::<i32>().map_err(|_| {
-                        ParserError::ParserError("EMBEDDING_DIM must be a valid integer".into())
-                    })?)
-                }
+                Value::Number(s, _) => Some(s.parse::<i32>().map_err(|_| {
+                    ParserError::ParserError("EMBEDDING_DIM must be a valid integer".into())
+                })?),
                 _ => {
-                    return Err(ParserError::ParserError("EMBEDDING_DIM must be a number".into()));
+                    return Err(ParserError::ParserError(
+                        "EMBEDDING_DIM must be a number".into(),
+                    ));
                 }
             }
+        } else {
+            None
+        };
+
+        // IMAGE_MIME (optional) - string literal
+        let image_mime = if self.parse_keyword(Keyword::IMAGE_MIME) {
+            Some(self.parse_literal_string()?)
         } else {
             None
         };
@@ -7146,6 +7153,7 @@ impl<'a> Parser<'a> {
             api_key,
             endpoint,
             embedding_dim,
+            image_mime,
             options,
         }))
     }
