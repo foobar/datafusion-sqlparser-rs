@@ -4107,6 +4107,10 @@ pub enum Statement {
     /// ```
     ShowAiModels,
     /// ```sql
+    /// SHOW NODES
+    /// ```
+    ShowNodes,
+    /// ```sql
     /// SHOW <variable>
     /// ```
     ///
@@ -5897,6 +5901,7 @@ impl fmt::Display for Statement {
                 Ok(())
             }
             Statement::ShowAiModels => write!(f, "SHOW AI MODELS"),
+            Statement::ShowNodes => write!(f, "SHOW NODES"),
             Statement::Use(use_expr) => use_expr.fmt(f),
             Statement::ShowCollation { filter } => {
                 write!(f, "SHOW COLLATION")?;

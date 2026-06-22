@@ -697,6 +697,7 @@ define_keywords!(
     NOCREATEDB,
     NOCREATEROLE,
     NOCYCLE,
+    NODES,
     NOINHERIT,
     NOLOGIN,
     NONE,

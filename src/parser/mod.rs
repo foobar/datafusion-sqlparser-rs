@@ -15559,6 +15559,8 @@ impl<'a> Parser<'a> {
             Ok(Statement::ShowProcessList { full })
         } else if self.parse_keywords(&[Keyword::AI, Keyword::MODELS]) {
             Ok(Statement::ShowAiModels)
+        } else if self.parse_keyword(Keyword::NODES) {
+            Ok(Statement::ShowNodes)
         } else if extended || full {
             Err(ParserError::ParserError(
                 "EXTENDED/FULL are not supported with this type of SHOW query".to_string(),
