@@ -425,6 +425,7 @@ impl Spanned for Statement {
             Statement::Set(_) => Span::empty(),
             Statement::ShowFunctions { .. } => Span::empty(),
             Statement::ShowAiModels => Span::empty(),
+            Statement::ShowNodes => Span::empty(),
             Statement::ShowVariable { .. } => Span::empty(),
             Statement::ShowStatus { .. } => Span::empty(),
             Statement::ShowVariables { .. } => Span::empty(),
