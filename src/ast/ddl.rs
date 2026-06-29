@@ -5777,6 +5777,8 @@ pub struct CreateAiModel {
     pub embedding_dim: Option<i32>,
     /// MIME type for image embeddings (optional, e.g., 'image/jpeg')
     pub image_mime: Option<String>,
+    /// Input modality the model accepts (optional, e.g., 'audio', 'image', 'text')
+    pub modality: Option<String>,
     /// JSON options string (optional)
     pub options: Option<String>,
 }
@@ -5805,6 +5807,9 @@ impl fmt::Display for CreateAiModel {
                 " IMAGE_MIME '{}'",
                 escape_single_quote_string(image_mime)
             )?;
+        }
+        if let Some(ref modality) = self.modality {
+            write!(f, " MODALITY '{}'", escape_single_quote_string(modality))?;
         }
         if let Some(ref options) = self.options {
             write!(f, " OPTIONS '{}'", escape_single_quote_string(options))?;

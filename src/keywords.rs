@@ -658,6 +658,7 @@ define_keywords!(
     MINVALUE,
     MIN_ROWS,
     MOD,
+    MODALITY,
     MODE,
     MODEL,
     MODELS,

@@ -7402,6 +7402,13 @@ impl<'a> Parser<'a> {
             None
         };
 
+        // MODALITY (optional) - string literal ('audio', 'image', 'text')
+        let modality = if self.parse_keyword(Keyword::MODALITY) {
+            Some(self.parse_literal_string()?)
+        } else {
+            None
+        };
+
         // OPTIONS (optional) - JSON string literal
         let options = if self.parse_keyword(Keyword::OPTIONS) {
             Some(self.parse_literal_string()?)
@@ -7417,6 +7424,7 @@ impl<'a> Parser<'a> {
             endpoint,
             embedding_dim,
             image_mime,
+            modality,
             options,
         }))
     }
