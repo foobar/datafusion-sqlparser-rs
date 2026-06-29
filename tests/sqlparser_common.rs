@@ -14694,6 +14694,32 @@ fn test_create_ai_model_with_options_only() {
 }
 
 #[test]
+fn test_create_ai_model_with_modality() {
+    // MODALITY clause declares a model's input modality (Plan 3 Task 4).
+    let sql = "CREATE AI MODEL clap_model PROVIDER 'custom' MODEL_NAME 'clap' EMBEDDING_DIM 512 MODALITY 'audio'";
+    let dialects = all_dialects();
+    match dialects.verified_stmt(sql) {
+        Statement::CreateAiModel(CreateAiModel { modality, .. }) => {
+            assert_eq!(modality, Some("audio".to_string()));
+        }
+        _ => unreachable!(),
+    }
+}
+
+#[test]
+fn test_create_ai_model_modality_defaults_absent() {
+    // Without MODALITY, the field is None (runtime default is [Text, Image]).
+    let sql = "CREATE AI MODEL my_openai PROVIDER 'openai' MODEL_NAME 'text-embedding-3-small'";
+    let dialects = all_dialects();
+    match dialects.verified_stmt(sql) {
+        Statement::CreateAiModel(CreateAiModel { modality, .. }) => {
+            assert_eq!(modality, None);
+        }
+        _ => unreachable!(),
+    }
+}
+
+#[test]
 fn test_drop_ai_model_display_roundtrip() {
     let sql = "DROP AI MODEL my_openai";
     let dialects = all_dialects();
