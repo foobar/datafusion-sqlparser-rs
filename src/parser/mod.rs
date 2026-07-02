@@ -7205,8 +7205,9 @@ impl<'a> Parser<'a> {
         } else if self.parse_keyword(Keyword::CONNECTOR) {
             return self.parse_drop_connector();
         } else if self.parse_keywords(&[Keyword::AI, Keyword::MODEL]) {
+            let if_exists = self.parse_keywords(&[Keyword::IF, Keyword::EXISTS]);
             let name = self.parse_object_name(false)?;
-            return Ok(Statement::DropAiModel { name });
+            return Ok(Statement::DropAiModel { name, if_exists });
         } else if self.parse_keyword(Keyword::DOMAIN) {
             return self.parse_drop_domain().map(Into::into);
         } else if self.parse_keyword(Keyword::PROCEDURE) {

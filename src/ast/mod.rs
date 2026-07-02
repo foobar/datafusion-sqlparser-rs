@@ -3796,11 +3796,14 @@ pub enum Statement {
     /// ```
     DropFunction(DropFunction),
     /// ```sql
-    /// DROP AI MODEL <name>
+    /// DROP AI MODEL [IF EXISTS] <name>
     /// ```
     DropAiModel {
         /// The name of the AI model to drop.
         name: ObjectName,
+        /// `DROP AI MODEL IF EXISTS <name>` — silently skip if the model doesn't
+        /// exist (matches `DROP TABLE IF EXISTS` semantics).
+        if_exists: bool,
     },
     /// ```sql
     /// DROP DOMAIN
@@ -5463,7 +5466,9 @@ impl fmt::Display for Statement {
                 Ok(())
             }
             Statement::DropFunction(drop_function) => write!(f, "{drop_function}"),
-            Statement::DropAiModel { name } => write!(f, "DROP AI MODEL {}", name),
+            Statement::DropAiModel { name, if_exists } => {
+                write!(f, "DROP AI MODEL{} {}", if *if_exists { " IF EXISTS" } else { "" }, name)
+            }
             Statement::DropDomain(DropDomain {
                 if_exists,
                 name,

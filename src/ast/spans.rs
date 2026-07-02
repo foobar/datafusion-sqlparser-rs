@@ -414,7 +414,7 @@ impl Spanned for Statement {
             Statement::DetachDuckDBDatabase { .. } => Span::empty(),
             Statement::Drop { .. } => Span::empty(),
             Statement::DropFunction(drop_function) => drop_function.span(),
-            Statement::DropAiModel { name } => name.span(),
+            Statement::DropAiModel { name, .. } => name.span(),
             Statement::DropDomain { .. } => Span::empty(),
             Statement::DropProcedure { .. } => Span::empty(),
             Statement::DropSecret { .. } => Span::empty(),
