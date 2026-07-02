@@ -14752,8 +14752,22 @@ fn test_drop_ai_model() {
     let sql = "DROP AI MODEL my_openai";
     let dialects = all_dialects();
     match dialects.verified_stmt(sql) {
-        Statement::DropAiModel { name } => {
+        Statement::DropAiModel { name, if_exists } => {
             assert_eq!(name.to_string(), "my_openai");
+            assert!(!if_exists, "DROP AI MODEL (no IF EXISTS) → if_exists=false");
+        }
+        _ => unreachable!(),
+    }
+}
+
+#[test]
+fn test_drop_ai_model_if_exists() {
+    let sql = "DROP AI MODEL IF EXISTS my_openai";
+    let dialects = all_dialects();
+    match dialects.verified_stmt(sql) {
+        Statement::DropAiModel { name, if_exists } => {
+            assert_eq!(name.to_string(), "my_openai");
+            assert!(if_exists, "DROP AI MODEL IF EXISTS → if_exists=true");
         }
         _ => unreachable!(),
     }
@@ -14881,6 +14895,14 @@ fn test_create_ai_model_modality_defaults_absent() {
 #[test]
 fn test_drop_ai_model_display_roundtrip() {
     let sql = "DROP AI MODEL my_openai";
+    let dialects = all_dialects();
+    let stmt = dialects.verified_stmt(sql);
+    assert_eq!(stmt.to_string(), sql);
+}
+
+#[test]
+fn test_drop_ai_model_if_exists_display_roundtrip() {
+    let sql = "DROP AI MODEL IF EXISTS my_openai";
     let dialects = all_dialects();
     let stmt = dialects.verified_stmt(sql);
     assert_eq!(stmt.to_string(), sql);
