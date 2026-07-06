@@ -5781,13 +5781,21 @@ pub struct CreateAiModel {
     pub modality: Option<String>,
     /// JSON options string (optional)
     pub options: Option<String>,
+    /// `IF NOT EXISTS` clause (mirrors `CreateTable::if_not_exists`): when
+    /// true + the model already exists, the apply skips (no-op, success)
+    /// instead of erroring with `duplicate_object`.
+    pub if_not_exists: bool,
 }
 
 impl fmt::Display for CreateAiModel {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "CREATE AI MODEL")?;
+        if self.if_not_exists {
+            write!(f, " IF NOT EXISTS")?;
+        }
         write!(
             f,
-            "CREATE AI MODEL {} PROVIDER '{}' MODEL_NAME '{}'",
+            " {} PROVIDER '{}' MODEL_NAME '{}'",
             self.name,
             escape_single_quote_string(&self.provider),
             escape_single_quote_string(&self.model_name)
