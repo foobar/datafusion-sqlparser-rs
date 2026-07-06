@@ -14539,6 +14539,22 @@ fn test_create_ai_model_minimal() {
 }
 
 #[test]
+fn test_create_ai_model_if_not_exists() {
+    let sql = "CREATE AI MODEL IF NOT EXISTS my_openai PROVIDER 'openai' MODEL_NAME 'text-embedding-3-small'";
+    let dialects = all_dialects();
+    // `verified_stmt` round-trips (parse → Display → re-parse → assert
+    // equal), so this also pins that the IF NOT EXISTS clause survives the
+    // Display round-trip.
+    match dialects.verified_stmt(sql) {
+        Statement::CreateAiModel(CreateAiModel {
+            if_not_exists: true,
+            ..
+        }) => {}
+        _ => unreachable!("expected CreateAiModel with if_not_exists: true"),
+    }
+}
+
+#[test]
 fn test_create_ai_model_full() {
     let sql = "CREATE AI MODEL local_embed PROVIDER 'custom' MODEL_NAME 'all-minilm-l6-v2' API_KEY 'optional-key' ENDPOINT 'http://localhost:8080/v1' OPTIONS '{\"dimension\": 384}'";
     let dialects = all_dialects();

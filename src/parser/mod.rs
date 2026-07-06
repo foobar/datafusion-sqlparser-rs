@@ -7090,6 +7090,8 @@ impl<'a> Parser<'a> {
 
     /// Parse CREATE AI MODEL statement
     fn parse_create_ai_model(&mut self) -> Result<Statement, ParserError> {
+        // IF NOT EXISTS (mirrors CREATE TABLE) — optional, before the name.
+        let if_not_exists = self.parse_keywords(&[Keyword::IF, Keyword::NOT, Keyword::EXISTS]);
         let name = self.parse_object_name(false)?;
 
         // PROVIDER (required)
@@ -7163,6 +7165,7 @@ impl<'a> Parser<'a> {
             image_mime,
             modality,
             options,
+            if_not_exists,
         }))
     }
 
